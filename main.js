@@ -4,7 +4,7 @@
 
 console.log('loaded main.js');
 
-const regitServiceWorker = (()=>{
+function regitsServiceWorker() {
   if (navigator.serviceWorker) {
     return navigator.serviceWorker.register('./sw-cache.js')
     .then(()=>{
@@ -19,6 +19,7 @@ const regitServiceWorker = (()=>{
             if (data.ok) {
               return data.text();
             }
+
             return null;
 
             //throw new Error('sw_version is no response.');
@@ -27,7 +28,6 @@ const regitServiceWorker = (()=>{
 
             return {version};
         });
-
     });
   }
 
@@ -36,72 +36,40 @@ const regitServiceWorker = (()=>{
     console.log('serviceWorkerが使えません。');
     throw new Error('navigator.serviceWorker undefined.');
   });
-})();
+}
 
+function checkLoadedDocument() {
+  return new Promise((resolve) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', resolve);
+    } else {
+      resolve();
+    }
+  });
+}
 
 const $id=document.getElementById.bind(document);
 
-const LoadedDocument = new Promise((resolve) => {
-  console.log(`Doc readyState:${document.readyState}`);
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', resolve);
-  } else {
-    console.log(`Doc readyState:${document.readyState}`);
-    resolve();
-  }
-});
-
-function infoMessage($info) {
+function u$($elm) {
   return {
-    log(msg) {
-      console.log(msg);
-      $info.textContent=msg;
-    }
-  };
-}
-function ttgView($disp) {
-  return {
-    setInnerHTML(strHtml) {
-      $disp.innerHTML=strHtml;
+    text(msg) {
+      $elm.textContent = msg;
     }
   };
 }
 
-const persedDocument= LoadedDocument.then(()=>{
-  console.log('LoadedDoccument');
-
-  const docElements = {
-      tView: ttgView($id('disp')),
-      tView2: ttgView($id('disp2')),
-      message: infoMessage($id('info'))
-    };
-
-  docElements.message.log('hello.');
-  docElements.tView.setInnerHTML('script init data');
-
-  return docElements;
-});
-
-
-Promise.all([persedDocument,regitServiceWorker]).then((values)=>{
-  const doc = values[0],
+(async () => {
+  const values = await Promise.all([
+          checkLoadedDocument(),
+          regitsServiceWorker()
+        ]),
         swInfo = values[1];
 
+  console.log('LoadedDoccument');
   if (swInfo === null) {
-    doc.message.log('please, reload for servie workers.');
-
     return;
   }
-  doc.message.log(swInfo.version);
+  const $ver = $id('swVersion');
 
-  fetch('./sw/sample.data').then((data) =>{
-      return data.text();
-  })
-  .then(doc.tView.setInnerHTML);
-
-  fetch('./sw/sample2.data').then((data) =>{
-      return data.text();
-  })
-  .then(doc.tView2.setInnerHTML);
-});
+  u$($ver).text(swInfo.version);
+})();
