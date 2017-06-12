@@ -3,9 +3,11 @@
 /*eslint no-console: off */
 
 //
-const swVersion = 'sw-cash.js(2017/06/06 06:46)';
-const cacheName = 'sw-test-v1';
+const swVersion = 'sw-cash.js(2017/06/13 07:36)';
+const cacheName = 'sw-test-v2';
 const cacheNamePattern = /^sw-test(|-v[0-9]+)$/;
+
+//eslint-disable-next-line no-unused-vars
 const checkUpdateUrl =(()=>{
   const checkList =[
      '',
@@ -24,6 +26,15 @@ const checkUpdateUrl =(()=>{
      return checkList.indexOf(url) >= 0;
    };
 })();
+
+function checkCacheOnlyURL(url) {
+    if (/\/cache\//.test(url)) {
+      return true;
+    }
+
+    return false;
+}
+
 
 async function deleteOldVerCache() {
   const cacheNames = await caches.keys();
@@ -158,15 +169,13 @@ async function getResponseCacheAndUpdate(req) {
 }
 
 async function getResponse(req) {
-  const UpdateMode = checkUpdateUrl(req.url);
+  // const UpdateMode = checkUpdateUrl(req.url);
   let resp = null;
 
-  if (UpdateMode) {
-    //resp = await getResponseUpdateAndCache(req);
-    resp = await getResponseCacheAndUpdate(req);
-
-  } else {
+  if (checkCacheOnlyURL(req.url)) {
     resp = await getResponseCacheOrFetch(req);
+  } else {
+    resp = await getResponseCacheAndUpdate(req);
   }
 
   return resp;
