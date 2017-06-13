@@ -19,7 +19,7 @@ app.use(async (ctx, next) => {
 });
 
 // static resource
-app.use(serv(path.join(__dirname, '/'), {
+app.use(serv(path.join(__dirname, 'docs/'), {
   index: 'index.html',
   extensions: ['html']
 }));
