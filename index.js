@@ -1,4 +1,4 @@
-/* tategaki index.js */
+/* static-page index.js */
 /*eslint-env node */
 /*eslint no-console: off */
 
@@ -12,12 +12,7 @@ app.use(async (ctx, next) => {
   const path = ctx.request.path;
 
   if (path === '') {
-    console.log(`add slash:${ctx.url}`);
-    console.log(`url:${ctx.request.url}`);
-    console.log(`path:${ctx.request.path}`);
     ctx.request.path += '/';
-    console.log(`url:${ctx.request.url}`);
-    console.log(`path:${ctx.request.path}`);
   }
 
   await next();
