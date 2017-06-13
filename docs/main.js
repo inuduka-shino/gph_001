@@ -66,10 +66,13 @@ function u$($elm) {
         swInfo = values[1];
 
   console.log('LoadedDoccument');
+  const $ver = $id('swVersion');
+
   if (swInfo === null) {
+    u$($ver).text('service worker do not regist.');
+
     return;
   }
-  const $ver = $id('swVersion');
 
   u$($ver).text(swInfo.version);
 })();

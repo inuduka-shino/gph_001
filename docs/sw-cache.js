@@ -3,7 +3,7 @@
 /*eslint no-console: off */
 
 //
-const swVersion = 'sw-cash.js(2017/06/13 07:36)';
+const swVersion = 'sw-cash.js(2017/06/14 07:32)';
 const cacheName = 'sw-test-v2';
 const cacheNamePattern = /^sw-test(|-v[0-9]+)$/;
 
@@ -143,27 +143,25 @@ async function getResponseUpdateAndCache(req) {
 async function getResponseCacheAndUpdate(req) {
   // あればcache + 次回向けにUpdateチェック
   const cache = await caches.open(cacheName);
-  const cacheResp = await cache.match(req);
-  const fetchPromise = fetch(
+  const cacheRespPromise = cache.match(req);
+  const fetchRespPromise = fetch(
         req.clone(),
         {cache: 'default'}
       );
 
-  if (cacheResp) {
-    fetchPromise.then((resp) =>{
-      if (resp.status === 200 && resp.type === 'basic') {
-        cache.put(req, resp);
-      }
-    });
+  fetchRespPromise.then((resp) =>{
+    if (resp.status === 200 && resp.type === 'basic') {
+      cache.put(req, resp.clone());
+    }
+  });
 
+  const cacheResp = await cacheRespPromise;
+
+  if (cacheResp) {
     return cacheResp;
   }
   // キャッシュになければ、fetchを待ってresponseを戻す。
-  const resp = await fetchPromise;
-
-  if (resp.status === 200 && resp.type === 'basic') {
-    await cache.put(req, resp.clone());
-  }
+  const resp = await fetchRespPromise;
 
   return resp;
 }
